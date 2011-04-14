@@ -1,23 +1,29 @@
 require 'rubygems'
 require 'sinatra/base'
-require 'redis'
+#require 'redis'
+require 'redis-store'
 require 'slim'
 require 'less'
 
 
 class MyApp < Sinatra::Base
-	redis = Redis.new
-
 	set :redis, 'redis://localhost:6379/0'
-	disable :logging
+	use Rack::Session::Redis, :redis_server => settings.redis
+	enable :method_override
 
+
+	redis = Redis.new
 	redis.set "song", 320
 
 	get '/:x?' do
 		@name = nice_time(redis.get 'song')
 		puts params[:x].inspect
+		
+		session[:visited_at] = DateTime.now.to_s
+
 		if params[:x] == 'x'
-			@name = 'grrrr'
+			@name = 'balls'
+			@name = session[:visited_at]
 			slim :foo, :layout => :xlayout	
 		else
 			slim :foo
