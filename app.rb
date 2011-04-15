@@ -8,15 +8,30 @@ require 'models'
 
 class MyApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
+	redis = Redis.new
+	
 	enable :sessions
 	set :session_secret, '34nnt0b09isn3j23nrkj3rn23jndj90b90j0dfi4moimoinbgnbklmo'
-	enable :method_override
+	
+	enable :method_override # fake PUT and DELETE via name="_method"
+	set :slim, :pretty => true
+	
+	helpers do
+		def plural(singular, count, plural=nil)
+			plural ||= singular + 's'		
 
-	redis = Redis.new
+			if count.to_i == 1
+				singular
+			else
+				plural
+			end
+		end
+	end
 
 	before do
 		redis.mset 'user/1/email', 'eric@vawks.com',
-			'user/1/password', myhash('rules')
+			'user/1/password', myhash('rules'),
+			'user/email/eric@vawks.com', 1
 		
 		# is the user logged in?
 		if true
@@ -58,7 +73,13 @@ class MyApp < Sinatra::Base
 	end
 
 	get '/dashboard/:id' do
-	
+		@band = Band.new(params[:id])
+		@lists = @band.lists.map do |id|
+			List.new(id)
+		end
+
+		@song_count = @band.song_count
+		@total_time = nice_time(@band.length)
 		slim :dashboard
 	end
 end

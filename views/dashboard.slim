@@ -1,0 +1,39 @@
+h1 = @band.name
+
+h3 Lists
+
+a href=to('/dashboard/' + @band.id + '/new_list') New List
+
+- if @lists
+	table border="1"
+		thead
+			tr
+				th Name
+				th Length
+				th Sets
+				th Actions
+		tbody
+			- for list in @lists do
+				tr
+					td = list.name
+					td = list.length
+					td = list.sets.length
+					td
+						a href=url('/list/' + list.id + '/edit') Edit
+						' 
+						a href=url('/list/' + list.id + '/delete') Delete
+			
+
+
+- else
+	p.no-lists
+		' No lists. Please
+		a href=to('/dashboard/' + @band.id + '/new_list') create a new list
+		'.
+
+#song-stats
+	span.song-count = @song_count
+	' 
+	= plural('song', @song_count)
+	.total-time = @total_time
+	a href=url('/songs/' + @band.id) edit songs
