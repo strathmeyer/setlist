@@ -4,26 +4,7 @@ require 'redis'
 require 'slim'
 require 'less'
 require 'digest/sha1'
-
-
-class Band
-	attr_reader :id, :name
-
-	def initialize(id)
-		@redis = Redis.new
-		@id = id
-		@name = @redis.get('band/' << id.to_s << '/name')
-		@song_count = nil
-	end
-
-	def songs
-		@redis.lrange('band/' << id.to_s << '/songs', 0, -1)
-	end
-	
-	def song_count
-		@song_count ||= @redis.llen('band/' << id.to_s << '/songs')
-	end
-end
+require 'models'
 
 class MyApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
@@ -45,7 +26,7 @@ class MyApp < Sinatra::Base
 			@user = {}
 			@user[:id] = id
 			@user[:email] = redis.get 'user/' << id.to_s << '/email'	
-			@user[:bands] = redis.lrange 'user/' << id.to_s << '/bands', 0, -1	
+			@user[:bands] = redis.smembers 'user/' << id.to_s << '/bands'
 		else
 			# no? redirect to login
 			throw "barf"
@@ -61,6 +42,19 @@ class MyApp < Sinatra::Base
 		end
 
 		slim :bands
+	end
+
+	put '/' do
+		# make a band
+		id = redis.incr 'globalNextBandID'
+		id = id.to_s
+		band = 'band/' + id
+		redis.set(band + '/name', params[:band_name])
+		redis.sadd(band + '/users', @user[:id])
+		redis.sadd(band + '/admins', @user[:id])
+		redis.sadd('user/' + @user[:id].to_s + '/bands', id)
+
+		redirect('/')
 	end
 
 	get '/dashboard/:id' do
