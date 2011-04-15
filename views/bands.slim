@@ -1,0 +1,9 @@
+- unless @bands.empty?
+	ul
+		- for band in @bands do
+			li band-id="#{band.id}"
+				a href=url('/dashboard/' << band.id)
+					= band.name << ' (' << band.song_count.to_s << ')'
+
+button#submit-btn
+	| Do it.

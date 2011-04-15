@@ -6,6 +6,25 @@ require 'less'
 require 'digest/sha1'
 
 
+class Band
+	attr_reader :id, :name
+
+	def initialize(id)
+		@redis = Redis.new
+		@id = id
+		@name = @redis.get('band/' << id.to_s << '/name')
+		@song_count = nil
+	end
+
+	def songs
+		@redis.lrange('band/' << id.to_s << '/songs', 0, -1)
+	end
+	
+	def song_count
+		@song_count ||= @redis.llen('band/' << id.to_s << '/songs')
+	end
+end
+
 class MyApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
 	enable :sessions
@@ -13,7 +32,6 @@ class MyApp < Sinatra::Base
 	enable :method_override
 
 	redis = Redis.new
-
 
 	before do
 		redis.mset 'user/1/email', 'eric@vawks.com',
@@ -26,8 +44,8 @@ class MyApp < Sinatra::Base
 			# yes? set the @user variable
 			@user = {}
 			@user[:id] = id
-			@user[:email] = redis.get 'user/' << id << '/email'	
-			@user[:bands] = redis.get 'user/' << id << '/bands'	
+			@user[:email] = redis.get 'user/' << id.to_s << '/email'	
+			@user[:bands] = redis.lrange 'user/' << id.to_s << '/bands', 0, -1	
 		else
 			# no? redirect to login
 			throw "barf"
@@ -36,11 +54,17 @@ class MyApp < Sinatra::Base
 
 
 	get '/' do
-		@bands = @user[:bands]
+		@bands = []
+		
+		@user[:bands].each do |id|
+			@bands << Band.new(id)
+		end
+
 		slim :bands
 	end
 
-	get '/dashboard' do
+	get '/dashboard/:id' do
+	
 		slim :dashboard
 	end
 end
