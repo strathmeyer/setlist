@@ -7,6 +7,8 @@ require 'digest/sha1'
 require 'models'
 
 class MyApp < Sinatra::Base
+	use Rack::Static, :urls => ["/css", "/images"], :root => "public"
+
 	set :redis, 'redis://localhost:6379/0'
 	redis = Redis.new
 	

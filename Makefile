@@ -1,2 +1,5 @@
 server:
-	 shotgun -sthin -Ppublic -p33202 > out.log >&out.log &
+	 shotgun -sthin -p33202 >out.log >&out.log &
+
+production:
+	rackup -sthin -p33202 >out.log >&out.log &
