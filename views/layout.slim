@@ -4,7 +4,20 @@ html
 	head
 		title Booya!
 	body
-		h1 This is my site
+		ul
+			li
+				a href=url('/dashboard') Dashboard
+			li
+				a href=url('/my_account') My Account
+			- if true
+				li
+					a href=url('/band/1/admin') Admin
+			- if true
+				li
+					a href=url('/logout') Logout
+
+		h1 FreeSetlist.com
+
 		== yield
 		- for script in @scripts do
 			script src=script

@@ -1,35 +1,20 @@
+# gems:
 require 'rubygems'
 require 'sinatra/base'
 require 'redis'
 require 'slim'
 require 'less'
 require 'digest/sha1'
+
+# local includes
+require 'config'
+require 'helpers'
 require 'models'
 
-class MyApp < Sinatra::Base
-	use Rack::Static, :urls => ["/css", "/images", "/scripts"], :root => "public"
-
+class SetlistApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
 	redis = Redis.new
 	
-	enable :sessions
-	set :session_secret, '34nnt0b09isn3j23nrkj3rn23jndj90b90j0dfi4moimoinbgnbklmo'
-	
-	enable :method_override # fake PUT and DELETE via name="_method"
-	set :slim, :pretty => true
-	
-	helpers do
-		def plural(singular, count, plural=nil)
-			plural ||= singular + 's'		
-
-			if count.to_i == 1
-				singular
-			else
-				plural
-			end
-		end
-	end
-
 	before do
 		@scripts = []
 		@scripts << 'https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'
@@ -131,48 +116,3 @@ class MyApp < Sinatra::Base
 	end
 end
 
-def nice_time(minutes)
-	minutes = minutes.to_i
-
-	if minutes == 0 then
-		"0m"
-	else
-		hour = minutes / 60
-		min = minutes % 60
-
-		out = []
-
-		out << "#{hour}h" if hour > 0
-		out << "#{min}m" if min > 0
-
-		out.join(' ')	
-	end
-end
-
-def myhash(input)
-	Digest::SHA1.hexdigest('zx0-cv8zxco90.,32m4n2.,3m4noadf' << \
-			Digest::SHA1.hexdigest(input.to_s << 'woweifnweofinweofi'))
-end
-
-def extract_time(text)
-	hours = 0
-	mins = 0
-
-	hmatches = /(\d+)h/.match(text)
-	hours = hmatches[1].to_i if hmatches
-
-	mmatches = /(\d+)m/.match(text)
-	mins = mmatches[1].to_i if mmatches
-
-	return (hours * 60) + mins
-end
-
-def extract_integer(text)
-	matches = /(\d+)/.match(text)
-	
-	if matches
-		matches[1].to_i
-	else
-		0
-	end
-end
