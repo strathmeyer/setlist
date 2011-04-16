@@ -1,0 +1,23 @@
+p Enter song length in minutes. Songs must be at least 3 minutes.
+
+form action="" method="POST"
+	input type="text" name="name" placeholder="Name" 
+	input type="text" name="length" placeholder="(minutes)"
+	input type="submit" id="submit-btn"
+
+- if @songs.empty?
+	p Enter some songs already!
+- else
+	table
+		thead
+			tr
+				th Name
+				th Length
+				th Delete
+		tbody
+			- for song in @songs do
+				tr song-id=song.id
+					td = song.name
+					td = nice_time song.length
+					td 
+						button.delete-song X

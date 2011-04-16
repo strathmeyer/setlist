@@ -59,3 +59,16 @@ class List
 	end
 	
 end
+
+class Song
+	attr_reader :id, :name, :length
+	
+	def initialize(id)
+		redis = Redis.new
+
+		@id = id
+		prefix = 'song/' + id.to_s
+		@name = redis.get prefix + '/name'
+		@length = redis.get prefix + '/length'
+	end
+end

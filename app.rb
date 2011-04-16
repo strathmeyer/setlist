@@ -52,16 +52,23 @@ class MyApp < Sinatra::Base
 
 
 	get '/' do
+		# add login in here:
+		# if logged redirect to /dashboard
+		# else redirect to /login
+		redirect to('/dashboard')
+	end
+
+	get '/dashboard' do
 		@bands = []
 		
 		@user[:bands].each do |id|
 			@bands << Band.new(id)
 		end
 
-		slim :bands
+		slim :dashboard
 	end
 
-	put '/' do
+	post '/new_band' do
 		# make a band
 		id = redis.incr 'globalNextBandID'
 		id = id.to_s
@@ -71,35 +78,91 @@ class MyApp < Sinatra::Base
 		redis.sadd(band + '/admins', @user[:id])
 		redis.sadd('user/' + @user[:id].to_s + '/bands', id)
 
-		redirect('/')
+		redirect('/dashboard')
 	end
 
-	get '/dashboard/:id' do
+	get '/band/:id' do
 		@band = Band.new(params[:id])
+	
 		@lists = @band.lists.map do |id|
 			List.new(id)
 		end
 
 		@song_count = @band.song_count
 		@total_time = nice_time(@band.length)
-		slim :dashboard
+		slim :band
+	end
+
+	get '/band/:id/songs' do
+		@band = Band.new(params[:id])
+		@songs = @band.songs.map do |song|
+			Song.new(song)
+		end
+
+		@songs.sort_by do |s|
+			s.name
+		end
+
+		slim :songs
+	end
+
+	post '/band/:band/songs' do
+		id = redis.incr 'globalNextSongID'
+		id = id.to_s
+		key = 'song/' + id
+		redis.set(key + '/name', params[:name])
+
+		length = extract_integer(params[:length])
+
+		redis.set(key + '/length', length)
+		redis.sadd('band/' + params[:band] + '/songs', id)
+
+		redirect '/band/' + params[:band] + '/songs'
 	end
 end
 
 def nice_time(minutes)
 	minutes = minutes.to_i
-	hour = minutes / 60
-	min = minutes % 60
 
-	out = []
+	if minutes == 0 then
+		"0m"
+	else
+		hour = minutes / 60
+		min = minutes % 60
 
-	out << "#{hour}h" if hour > 0
-	out << "#{min}m" if min > 0
+		out = []
 
-	out.join(' ')	
+		out << "#{hour}h" if hour > 0
+		out << "#{min}m" if min > 0
+
+		out.join(' ')	
+	end
 end
 
 def myhash(input)
 	Digest::SHA1.hexdigest('zx0-cv8zxco90.,32m4n2.,3m4noadf' << \
 			Digest::SHA1.hexdigest(input.to_s << 'woweifnweofinweofi'))
+end
+
+def extract_time(text)
+	hours = 0
+	mins = 0
+
+	hmatches = /(\d+)h/.match(text)
+	hours = hmatches[1].to_i if hmatches
+
+	mmatches = /(\d+)m/.match(text)
+	mins = mmatches[1].to_i if mmatches
+
+	return (hours * 60) + mins
+end
+
+def extract_integer(text)
+	matches = /(\d+)/.match(text)
+	
+	if matches
+		matches[1]
+	else
+		0
+	end
 end
