@@ -4,7 +4,7 @@ h3 Lists
 
 a href=to('/band/' + @band.id + '/new_list') New List
 
-- if @lists
+- if !@lists.empty?
 	table border="1"
 		thead
 			tr

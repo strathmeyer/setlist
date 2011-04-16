@@ -6,3 +6,5 @@ html
 	body
 		h1 This is my site
 		== yield
+		- for script in @scripts do
+			script src=script

@@ -7,7 +7,7 @@ require 'digest/sha1'
 require 'models'
 
 class MyApp < Sinatra::Base
-	use Rack::Static, :urls => ["/css", "/images"], :root => "public"
+	use Rack::Static, :urls => ["/css", "/images", "/scripts"], :root => "public"
 
 	set :redis, 'redis://localhost:6379/0'
 	redis = Redis.new
@@ -31,6 +31,9 @@ class MyApp < Sinatra::Base
 	end
 
 	before do
+		@scripts = []
+		@scripts << 'https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'
+
 		redis.mset 'user/1/email', 'eric@vawks.com',
 			'user/1/password', myhash('rules'),
 			'user/email/eric@vawks.com', 1
@@ -83,7 +86,6 @@ class MyApp < Sinatra::Base
 
 	get '/band/:id' do
 		@band = Band.new(params[:id])
-	
 		@lists = @band.lists.map do |id|
 			List.new(id)
 		end
@@ -99,25 +101,33 @@ class MyApp < Sinatra::Base
 			Song.new(song)
 		end
 
-		@songs.sort_by do |s|
+		@songs = @songs.sort_by do |s|
 			s.name
 		end
-
+		
+		@scripts << '/scripts/songs.js'
 		slim :songs
 	end
 
 	post '/band/:band/songs' do
-		id = redis.incr 'globalNextSongID'
-		id = id.to_s
+		id = redis.incr('globalNextSongID').to_s
 		key = 'song/' + id
+
 		redis.set(key + '/name', params[:name])
-
-		length = extract_integer(params[:length])
-
-		redis.set(key + '/length', length)
 		redis.sadd('band/' + params[:band] + '/songs', id)
 
+		length = extract_integer(params[:length])
+		length = 3 if length < 3
+		redis.set(key + '/length', length)
+
 		redirect '/band/' + params[:band] + '/songs'
+	end
+
+	delete '/band/:band/song/:song' do
+		key = 'song/' + params[:song]
+
+		redis.del(key + '/name', key + '/length')
+		redis.srem('band/' + params[:band] + '/songs', params[:song])
 	end
 end
 
@@ -161,7 +171,7 @@ def extract_integer(text)
 	matches = /(\d+)/.match(text)
 	
 	if matches
-		matches[1]
+		matches[1].to_i
 	else
 		0
 	end

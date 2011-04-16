@@ -16,7 +16,7 @@ form action="" method="POST"
 				th Delete
 		tbody
 			- for song in @songs do
-				tr song-id=song.id
+				tr song-id=song.id band-id=@band.id
 					td = song.name
 					td = nice_time song.length
 					td 
