@@ -1,8 +1,6 @@
-== slim :band_hd
-
 h3 Lists
 
-a href=to('/band/' + @band.id + '/new_list') New List
+a#new-list-btn href=to('/band/' + @band.id + '/new_list') New List
 
 - if !@lists.empty?
 	table border="1"
@@ -27,9 +25,13 @@ a href=to('/band/' + @band.id + '/new_list') New List
 
 - else
 	p.no-lists
-		' No lists. Please
-		a href=to('/band/' + @band.id + '/new_list') create a new list
-		'.
+		- if @song_count > 0
+			' No lists. Please
+			a href=to('/band/' + @band.id + '/new_list') create a new list
+			'.
+		- else
+			a href=to('/band/' + @band.id + '/songs') Add some songs
+			'. After that, you can create a setlist.
 
 #song-stats
 	span.song-count = @song_count

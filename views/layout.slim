@@ -2,22 +2,32 @@ doctype html
 
 html
 	head
-		title Booya!
+		title Free Setlist!
+		style == less :site
 	body
-		ul
-			li
-				a href=url('/dashboard') Dashboard
-			li
-				a href=url('/my_account') My Account
-			- if true
-				li
-					a href=url('/band/1/admin') Admin
-			- if true
-				li
-					a href=url('/logout') Logout
+		#doc
+			#hd
+				ul#global-nav
+					li
+						a href=url('/dashboard') Dashboard
+					li
+						a href=url('/my_account') My Account
+					- if true
+						li
+							a href=url('/logout') Logout
 
-		h1 FreeSetlist.com
-
-		== yield
+				h1#logo Free Setlist
+				
+				- if @band
+					== slim :band_hd
+			#content
+				== yield
+			#ft
+				| &copy;2011 Vawks
+		
+		script src='https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'
+		script src='/scripts/underscore-min.js'
+		script src='/scripts/jquery.textPlaceholder.js'
+		script src='/scripts/site.js'
 		- for script in @scripts do
 			script src=script

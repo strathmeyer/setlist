@@ -17,7 +17,6 @@ class SetlistApp < Sinatra::Base
 	
 	before do
 		@scripts = []
-		@scripts << 'https://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js'
 
 		redis.mset 'user/1/email', 'eric@vawks.com',
 			'user/1/password', myhash('rules'),
@@ -66,7 +65,7 @@ class SetlistApp < Sinatra::Base
 		redis.sadd(band + '/admins', @user[:id])
 		redis.sadd('user/' + @user[:id].to_s + '/bands', id)
 
-		redirect('/dashboard')
+		redirect('/band/' + id)
 	end
 
 	get '/band/:id' do
@@ -104,6 +103,7 @@ class SetlistApp < Sinatra::Base
 		length = extract_integer(params[:length])
 		length = 3 if length < 3
 		redis.set(key + '/length', length)
+		redis.incrby('band/' + params[:band] + '/length', length)
 
 		redirect '/band/' + params[:band] + '/songs'
 	end
@@ -111,8 +111,39 @@ class SetlistApp < Sinatra::Base
 	delete '/band/:band/song/:song' do
 		key = 'song/' + params[:song]
 
+		length = redis.get(key + '/length')
 		redis.del(key + '/name', key + '/length')
 		redis.srem('band/' + params[:band] + '/songs', params[:song])
+		redis.decrby('band/' + params[:band] + '/length', length)
 	end
+
+	get '/band/:id/new_list' do
+		@band = Band.new(params[:id])
+		@songs = @band.songs.map do |song|
+			Song.new(song)
+		end
+		
+		@list = List.new
+
+		@scripts << '/scripts/list.js'
+		slim :list
+	end
+
+	get '/band/:band/list/:list' do
+		@band = Band.new(params[:band])
+		@band_songs = @band.songs.map do |song|
+			Song.new(song)
+		end
+		
+		@list = List.new(params[:list])
+		@list_songs = @band.songs.map do |song|
+			Song.new(song)
+		end
+
+
+		slim :list
+	end
+
+
 end
 

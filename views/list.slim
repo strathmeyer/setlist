@@ -1,0 +1,42 @@
+#set-container
+	ul#sets
+		li Set 1
+
+	button#add-set +
+
+#set-detail
+	#info
+		' Set
+		span.set-number 1
+		' : 
+		span.set-length 0
+		' m
+
+		#song-container
+
+#list-songs
+	- if @songs.empty?
+		p 
+			' You should probably 
+			a href=to('/band/' + @band.id + '/songs') enter some songs
+			'  first. Then this will make a lot more sense.
+	- else
+		table
+			thead
+				tr
+					th Add
+					th Name
+					th Length
+			tbody
+				- for song in @songs do
+					tr song-id=song.id band-id=@band.id length=song.length
+						td
+							button.add-song &laquo; 
+						td.name = song.name
+						td.length = nice_time song.length
+
+script#song-template type='text/html'
+	.song length='<%= length %>'
+		span.name <%= name %>
+		span.length <%= nice_length %>
+		button.remove-song X

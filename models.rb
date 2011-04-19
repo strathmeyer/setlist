@@ -42,19 +42,23 @@ class List
 #	list/<list_id>/sets = number of sets in the list
 #	list/<list_id>/<set_index> = a list of <song_id>s. note that set_index is 1 indexed
 
-	def initialize(id)
-		redis = Redis.new
-		@id = id
-		prefix = 'list/' + id.to_s
-		@name = redis.get prefix + '/name'
-		@length = redis.get prefix + '/length'
-		set_count = redis.scard(prefix + '/sets') or 0
-		
+	def initialize(id=nil)
 		@sets = []
-		set_count.times do |i|
-			n = (i + 1).to_s
 
-			@sets << redis.lrange(prefix + '/' + n, 0, -1)
+		if id
+			redis = Redis.new
+			@id = id
+			prefix = 'list/' + id.to_s
+			@name = redis.get prefix + '/name'
+			@length = redis.get prefix + '/length'
+			set_count = redis.scard(prefix + '/sets') or 0
+			
+			set_count.times do |i|
+				n = (i + 1).to_s
+
+				@sets << redis.lrange(prefix + '/' + n, 0, -1)
+			end
+			
 		end
 	end
 	
