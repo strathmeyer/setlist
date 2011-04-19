@@ -4,21 +4,6 @@ http://qooxdoo.org/documentation/general/webkit_css_styles
 http://trac.webkit.org/browser/trunk/LayoutTests//fast/css
 */
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-  padding: 0;
-  margin: 0;
-  -webkit-user-select: none;
-}
-
-body {
-  font-family: Apex,"Helvetica Neue","HelveticaNeue","Lucida Grande", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: bold;
-  -webkit-font-smoothing: antialiased;
-}
-
 a {
   color: #71829E;
   cursor: pointer;
