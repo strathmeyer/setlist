@@ -1,4 +1,7 @@
 // Hey! Try: http://colorschemedesigner.com/#3w52qlluJiiLt 
+
+@import url('public/css/reset.css');
+
 html {
 	font-family: sans-serif;
 	font-size: 14px;
@@ -12,6 +15,14 @@ body {
 	margin: 0;
 	padding: 0;
 	color: #333;
+}
+
+h1, h2, h3 {
+	margin: 0.5em 0;
+}
+
+p, li {
+	margin: 0.5em 0;
 }
 
 a {
@@ -99,6 +110,30 @@ a {
 	height: 300px;
 	width: 300px;
 	border: 1px solid black;
+
+	.song {
+		width: 280px;
+		float: left;
+		background: #DFF7C3;
+		margin: 0 0 3px;
+	}
+
+	.name, .length {
+		padding: 0.5em 0.25em;
+		float: left;
+	}
+
+	.name {
+		width: 150px;
+	}
+
+	.length {
+		width: 50px;
+	}
+
+	.remove-song {
+		float: right;
+	}
 }
 
 #set-detail {
@@ -109,6 +144,6 @@ a {
 	float:right;
 
 	tr.hover {
-		background: #99DE4A;
+		background: #DFF7C3;
 	}
 }

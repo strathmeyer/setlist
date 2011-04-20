@@ -56,6 +56,10 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/new_band' do
+		unless params.has_key? :band_name
+			halt 400, 'No band name specified.'
+		end
+
 		# make a band
 		id = redis.incr 'globalNextBandID'
 		id = id.to_s
