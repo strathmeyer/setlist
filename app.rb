@@ -13,6 +13,7 @@ require 'models'
 
 class SetlistApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
+	set :sess_length, 60*60*3 # 3 hrs
 	redis = Redis.new
 
 	helpers do
@@ -25,23 +26,30 @@ class SetlistApp < Sinatra::Base
 
 	before do
 		@scripts = []
-
+		
 		redis.mset 'user/1/email', 'eric@vawks.com',
 			'user/1/password', myhash('rules'),
 			'user/email/eric@vawks.com', 1
-		
-		# is the user logged in?
-		# if we have a session hash, and it matches a user id in redis
-		# keep that hash->user entry allive in redis.
-		# log the user in
-		if true
-			id = 1
 
-			# yes? set the @user variable
-			@user = {}
-			@user[:id] = id
-			@user[:email] = redis.get 'user/' << id.to_s << '/email'	
-			@user[:bands] = redis.smembers 'user/' << id.to_s << '/bands'
+		redis.mset 'user/2/email', 'test',
+			'user/2/password', myhash('test'),
+			'user/email/test', 2
+
+		redis.set 'global/nextUserID', 2
+
+		# is the user logged in?
+		if session.has_key? :auth
+			id = redis.get('auth/' + session[:auth])
+			redis.expire('auth/' + session[:auth], settings.sess_length)
+			if id
+				# yes? set the @user variable
+				@user = {}
+				@user[:id] = id
+				@user[:email] = redis.get 'user/' << id.to_s << '/email'	
+				@user[:bands] = redis.smembers 'user/' << id.to_s << '/bands'
+			else
+				session.delete :auth
+			end
 		end
 	end
 
@@ -58,19 +66,35 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/login' do
-		# if there's a user with that email
-			# if the user/pass matches
-				# set some session hash
-				# record that hash in redis expire in 30 min
-				# redirect to dashboard
-			# else
-				# flash "bad password". redirect to /
-		# else
+		['email', 'password'].each do |p|
+			unless params.has_key? p
+				halt 400, "No #{p} specified."
+			end
+		end
+
+		id = redis.get('user/email/' + params[:email])
+
+		if id
+			stored = redis.get("user/#{id}/password")
+			input = myhash(params[:password]) 
+
+			if stored and stored == input 
+				hash = Digest::SHA1.hexdigest(Time.now.to_i.to_s)
+
+				session[:auth] = hash
+				redis.setex("auth/#{hash}", settings.sess_length, id)
+				redirect to '/dashboard'
+			else
+				halt 400, "Bad password"
+			end
+		else
+			"Unknown user. Signup coming soon!"
 			# hash password
 			# random hash for signup token
 			# redis.hash('signup/e6b32', {email: 'foo', pass_hash: 'ab42e...'})
 			# send an email with link to signup token (e6b32)
 			# flash a "we emailed you" message. redirect to /
+		end
 	end
 
 	get '/signup/:token' do
@@ -80,6 +104,15 @@ class SetlistApp < Sinatra::Base
 		# else
 		halt 404		
 		
+	end
+
+	get '/logout' do
+		if session.has_key? :auth
+			redis.del('auth/' + session[:auth])
+			session.delete :auth
+		end
+
+		redirect to '/login'
 	end
 
 	get '/dashboard' do
