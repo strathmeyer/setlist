@@ -14,7 +14,15 @@ require 'models'
 class SetlistApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
 	redis = Redis.new
-	
+
+	helpers do
+		def user_or_login()
+			unless @user
+				redirect to('/login')
+			end
+		end
+	end	
+
 	before do
 		@scripts = []
 
@@ -23,6 +31,9 @@ class SetlistApp < Sinatra::Base
 			'user/email/eric@vawks.com', 1
 		
 		# is the user logged in?
+		# if we have a session hash, and it matches a user id in redis
+		# keep that hash->user entry allive in redis.
+		# log the user in
 		if true
 			id = 1
 
@@ -31,21 +42,49 @@ class SetlistApp < Sinatra::Base
 			@user[:id] = id
 			@user[:email] = redis.get 'user/' << id.to_s << '/email'	
 			@user[:bands] = redis.smembers 'user/' << id.to_s << '/bands'
-		else
-			# no? redirect to login
-			throw "barf"
 		end
 	end
 
-
 	get '/' do
-		# add login in here:
-		# if logged redirect to /dashboard
-		# else redirect to /login
+		user_or_login
+
 		redirect to('/dashboard')
 	end
 
+	get '/login' do
+		redirect to('/dashboard') if @user
+
+		slim :login
+	end
+
+	post '/login' do
+		# if there's a user with that email
+			# if the user/pass matches
+				# set some session hash
+				# record that hash in redis expire in 30 min
+				# redirect to dashboard
+			# else
+				# flash "bad password". redirect to /
+		# else
+			# hash password
+			# random hash for signup token
+			# redis.hash('signup/e6b32', {email: 'foo', pass_hash: 'ab42e...'})
+			# send an email with link to signup token (e6b32)
+			# flash a "we emailed you" message. redirect to /
+	end
+
+	get '/signup/:token' do
+		# if the tag 'signup/:token' exists
+			# create a user with the given email and password
+			# flash a "welcome!" message. redirect to dashboard
+		# else
+		halt 404		
+		
+	end
+
 	get '/dashboard' do
+		user_or_login
+
 		@bands = []
 		
 		@user[:bands].each do |id|
@@ -56,6 +95,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/new_band' do
+		user_or_login
+
 		unless params.has_key? :band_name
 			halt 400, 'No band name specified.'
 		end
@@ -73,6 +114,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:id' do
+		user_or_login
+
 		@band = Band.new(params[:id])
 		@lists = @band.lists.map do |id|
 			List.new(id)
@@ -84,6 +127,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:id/songs' do
+		user_or_login
+
 		@band = Band.new(params[:id])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
@@ -98,6 +143,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/band/:band/songs' do
+		user_or_login
+
 		id = redis.incr('globalNextSongID').to_s
 		key = 'song/' + id
 
@@ -113,6 +160,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	delete '/band/:band/song/:song' do
+		user_or_login
+
 		key = 'song/' + params[:song]
 
 		length = redis.get(key + '/length')
@@ -122,6 +171,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:id/new_list' do
+		user_or_login
+
 		@band = Band.new(params[:id])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
@@ -134,6 +185,8 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/list/:list' do
+		user_or_login
+
 		@band = Band.new(params[:band])
 		@band_songs = @band.songs.map do |song|
 			Song.new(song)

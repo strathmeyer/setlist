@@ -1,7 +1,7 @@
 require 'redis'
 
 class Band
-	attr_reader :id, :name, :song_count, :songs, :lists, :length
+	attr_accessor :id, :name, :song_count, :songs, :lists, :length
 
 	def initialize(id)
 		redis = Redis.new
