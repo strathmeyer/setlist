@@ -97,7 +97,7 @@ class SetlistApp < Sinatra::Base
 	post '/new_band' do
 		user_or_login
 
-		unless params.has_key? :band_name
+		unless params.has_key? 'band_name'
 			halt 400, 'No band name specified.'
 		end
 
