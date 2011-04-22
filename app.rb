@@ -5,6 +5,7 @@ require 'redis'
 require 'slim'
 require 'less'
 require 'digest/sha1'
+require 'pony'
 
 # local includes
 require 'config'
@@ -14,7 +15,8 @@ require 'models'
 class SetlistApp < Sinatra::Base
 	set :redis, 'redis://localhost:6379/0'
 	set :sess_length, 60*60*3 # 3 hrs
-	redis = Redis.new
+	set :r, Redis.new
+	redis = r
 
 	helpers do
 		def user_or_login()
@@ -26,16 +28,6 @@ class SetlistApp < Sinatra::Base
 
 	before do
 		@scripts = []
-		
-		redis.mset 'user/1/email', 'eric@vawks.com',
-			'user/1/password', myhash('rules'),
-			'user/email/eric@vawks.com', 1
-
-		redis.mset 'user/2/email', 'test',
-			'user/2/password', myhash('test'),
-			'user/email/test', 2
-
-		redis.set 'global/nextUserID', 2
 
 		# is the user logged in?
 		if session.has_key? :auth
@@ -75,35 +67,57 @@ class SetlistApp < Sinatra::Base
 		id = redis.get('user/email/' + params[:email])
 
 		if id
+			# user exists. check password
 			stored = redis.get("user/#{id}/password")
 			input = myhash(params[:password]) 
 
 			if stored and stored == input 
-				hash = Digest::SHA1.hexdigest(Time.now.to_i.to_s)
-
-				session[:auth] = hash
-				redis.setex("auth/#{hash}", settings.sess_length, id)
-				redirect to '/dashboard'
+				# password is good
+				login_user(id)
 			else
+				# password is bad
 				halt 400, "Bad password"
 			end
 		else
-			"Unknown user. Signup coming soon!"
-			# hash password
-			# random hash for signup token
-			# redis.hash('signup/e6b32', {email: 'foo', pass_hash: 'ab42e...'})
+			# no user. create a signup token and email them
+			hashed = myhash(params[:password])
+			signup = Digest::SHA1.hexdigest(Time.now.to_i.to_s)
+			email = params[:email]		
+
+			redis.hmset('signup/' + signup, 'email', email,
+																	 'password', hashed)
+			redis.expire('signup/' + signup, 60*60*24*30)
+
+			link = url('/signup/' + signup)
 			# send an email with link to signup token (e6b32)
-			# flash a "we emailed you" message. redirect to /
+			Pony.mail(:to => email,
+					:from => 'eric@vawks.com', 
+					:subject => 'Setlist Account Activation',
+					:body => "Please go to #{link} \n\nThis link is good for 30 days.")
+
+			# TODO: flash a "we emailed you" message
+			# redirect to '/'
+			"An activation link has ben emailed to you. This link is good for 30 days."
 		end
 	end
 
 	get '/signup/:token' do
-		# if the tag 'signup/:token' exists
+		user = redis.hgetall('signup/' + params[:token])
+
+		if !user.empty?
+			#return user['email'].inspect
 			# create a user with the given email and password
-			# flash a "welcome!" message. redirect to dashboard
-		# else
-		halt 404		
-		
+			id = redis.incr 'global/nextUserID'
+			id = id.to_s
+			u = 'user/' + id
+			redis.set(u + '/email', user['email'])
+			redis.set(u + '/password', user['password'])
+			redis.set('user/email/' + user['email'], id) 
+			redis.del('signup/' + params[:token])
+			login_user(id)
+		else
+			halt 404		
+		end
 	end
 
 	get '/logout' do
@@ -135,7 +149,7 @@ class SetlistApp < Sinatra::Base
 		end
 
 		# make a band
-		id = redis.incr 'globalNextBandID'
+		id = redis.incr 'global/nextBandID'
 		id = id.to_s
 		band = 'band/' + id
 		redis.set(band + '/name', params[:band_name])
@@ -178,7 +192,7 @@ class SetlistApp < Sinatra::Base
 	post '/band/:band/songs' do
 		user_or_login
 
-		id = redis.incr('globalNextSongID').to_s
+		id = redis.incr('global/nextSongID').to_s
 		key = 'song/' + id
 
 		redis.set(key + '/name', params[:name])

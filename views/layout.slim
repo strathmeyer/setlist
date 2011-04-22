@@ -18,6 +18,11 @@ html
 							a href=url('/logout') Logout
 
 				h1#logo Free Setlist
+
+				- if @user
+					p
+						' Logged in as
+						span.email = @user[:email]
 				
 				- if @band
 					== slim :band_hd

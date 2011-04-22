@@ -57,5 +57,15 @@ class SetlistApp < Sinatra::Base
 			end
 		end
 
+		def login_user(user_id)
+			redis = settings.r
+			hash = Digest::SHA1.hexdigest(Time.now.to_i.to_s)
+
+			session[:auth] = hash
+			redis.setex("auth/#{hash}", settings.sess_length, user_id)
+			redirect to '/dashboard'
+		end
+
+
 	end
 end
