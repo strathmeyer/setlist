@@ -8,20 +8,16 @@ a#new-list-btn href=to('/band/' + @band.id + '/new_list') New List
 			tr
 				th Name
 				th Length
-				th Sets
 				th Actions
 		tbody
 			- for list in @lists do
 				tr
 					td = list.name
 					td = list.length
-					td = list.sets.length
 					td
-						a href=url('/list/' + list.id + '/edit') Edit
+						a href=url("band/#{@band.id}/list/#{list.id}") Edit
 						' 
-						a href=url('/list/' + list.id + '/delete') Delete
-			
-
+						a href=url("band/#{@band.id}/list/#{list.id}/delete") Delete
 
 - else
 	p.no-lists

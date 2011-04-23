@@ -221,10 +221,10 @@ class SetlistApp < Sinatra::Base
 		redis.decrby('band/' + params[:band] + '/length', length)
 	end
 
-	get '/band/:id/new_list' do
+	get '/band/:band/new_list' do
 		user_or_login
 
-		@band = Band.new(params[:id])
+		@band = Band.new(params[:band])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
 		end
@@ -241,10 +241,10 @@ class SetlistApp < Sinatra::Base
 		band = params['band']
 		songs = params['songs']
 
-		return songs.inspect
-
-		if params[:list_name].empty?
-			halt 400, 'No list name specified.'
+		['list_name', 'songs'].each do |p|
+			if params[p].empty?
+				halt 400, "No #{p} specified."
+			end
 		end
 
 		# TODO: make sure there's at least one songs
@@ -252,14 +252,13 @@ class SetlistApp < Sinatra::Base
 		list = redis.incr('global/nextListID')
 		
 		songs.each do |song|
-			song_data = song['length'] + ':' + song['name']
-			redis.lpush("list/#{list}/songs", song_data)
+			redis.lpush("list/#{list}/songs", song)
 		end
 
 		redis.set("list/#{list}/name", params[:list_name])
-		redis.lpush("band/#{band}/lists", list)
+		redis.sadd("band/#{band}/lists", list)
 
-		redirect to "/band/#{params[:band]}"
+		list.to_s
 	end
 
 	get '/band/:band/list/:list' do
@@ -278,6 +277,19 @@ class SetlistApp < Sinatra::Base
 		slim :list
 	end
 
+	get '/band/:band/list/:list/delete' do
+		user_or_login
+
+		# confirm that user "owns" the list
+
+		band = params[:band]
+		list = params[:list]	
+
+		redis.srem("band/#{band}/lists", list)
+		redis.del("list/#{list}/name", "list/#{list}/songs")
+
+		redirect to "/band/#{band}"
+	end
 
 end
 

@@ -49,4 +49,25 @@ jQuery(function ($) {
 		song.remove();		
 	});
 
+	// save the list
+	$('#submit-btn').click(function (e) {
+		var songs = [],
+				listName = $('#list-name').val(),
+				bandID = $('#band-hd').attr('band-id');
+
+		e.preventDefault();
+
+		$('#song-container .song').each(function () {
+				var $this = $(this),
+						length = $this.attr('length'),
+						name = $this.find('.name').text();
+
+				songs.push(length + ':' + name);
+		});
+
+		$.post('', {list_name: listName, songs: songs}, function (listID) {
+			window.location = '/band/' + bandID + '/list/' + listID;
+		});
+	});
+
 });
