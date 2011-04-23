@@ -59,9 +59,13 @@ class SetlistApp < Sinatra::Base
 
 	post '/login' do
 		['email', 'password'].each do |p|
-			unless params.has_key? p
+			if params[p].empty?
 				halt 400, "No #{p} specified."
 			end
+		end
+
+		unless is_email(params['email'])
+				halt 400, "Bad email address"
 		end
 
 		id = redis.get('user/email/' + params[:email])

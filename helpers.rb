@@ -66,6 +66,10 @@ class SetlistApp < Sinatra::Base
 			redirect to '/dashboard'
 		end
 
+		def is_email(s)
+			valid = '[^ @]+'
+			/#{valid}@#{valid}\.#{valid}/ =~ s
+		end
 
 	end
 end
