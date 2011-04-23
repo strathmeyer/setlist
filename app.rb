@@ -279,7 +279,7 @@ class SetlistApp < Sinatra::Base
 	get '/band/:band/list/:list/print' do
 		@list = List.new(params[:list])
 
-		slim :print_list
+		slim :print_list, {layout: :print_layout}
 	end
 
 	get '/band/:band/list/:list/delete' do

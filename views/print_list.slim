@@ -1,0 +1,7 @@
+h1 = @list.name
+
+p = nice_time @list.length
+
+ul
+	- for song in @list.songs do
+		li = song.name

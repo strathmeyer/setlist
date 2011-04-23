@@ -5,12 +5,18 @@ h3
 		| New Setlist
 
 button#submit-btn Save
+
 input#list-name placeholder="List Name" value=@list.name
 
 #list-detail list-id=@list.id
-	' Total Length: 
-	span.list-length = @list.length
-	' m
+	p
+		' Total Length: 
+		span.list-length = @list.length
+		' m
+	
+	- if @list.id
+		p
+			a href=to("/band/#{@band.id}/list/#{@list.id}/print") Print
 
 	#song-container
 		- unless @list.songs.empty?
