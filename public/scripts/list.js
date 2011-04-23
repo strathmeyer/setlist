@@ -22,8 +22,8 @@ jQuery(function ($) {
 
 		songs.append(songTemplate(song));
 
-		$('.set-length').text(
-			parseInt($('.set-length').text(), 10) + parseInt(song.length, 10)
+		$('.list-length').text(
+			parseInt($('.list-length').text(), 10) + parseInt(song.length, 10)
 		);
 	});
 
@@ -42,8 +42,8 @@ jQuery(function ($) {
 
 		e.preventDefault();
 
-		$('.set-length').text(
-			parseInt($('.set-length').text(), 10) - length
+		$('.list-length').text(
+			parseInt($('.list-length').text(), 10) - length
 		);
 
 		song.remove();		
@@ -53,6 +53,7 @@ jQuery(function ($) {
 	$('#submit-btn').click(function (e) {
 		var songs = [],
 				listName = $('#list-name').val(),
+				length = $('#list-detail .list-length').text(), 
 				bandID = $('#band-hd').attr('band-id');
 
 		e.preventDefault();
@@ -65,8 +66,13 @@ jQuery(function ($) {
 				songs.push(length + ':' + name);
 		});
 
-		$.post('', {list_name: listName, songs: songs}, function (listID) {
-			window.location = '/band/' + bandID + '/list/' + listID;
+		$.post('', {
+				list_name: listName, 
+				songs: songs,
+				length: length
+			}, function (listID) {
+
+			window.location = '/band/' + bandID; // + '/list/' + listID;
 		});
 	});
 

@@ -35,7 +35,7 @@ class User
 end
 
 class List
-	attr_reader :id, :name, :length, :sets 
+	attr_reader :id, :name, :length, :songs 
 
 #	list/<list_id>/name = list name
 #	list/<list_id>/length = number of minutes total
@@ -44,6 +44,7 @@ class List
 
 	def initialize(id=nil)
 		@songs = []
+		@length = 0
 
 		if id
 			redis = Redis.new

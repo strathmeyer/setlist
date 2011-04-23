@@ -5,17 +5,24 @@ h3
 		| New Setlist
 
 button#submit-btn Save
-input#list-name placeholder="List Name"
+input#list-name placeholder="List Name" value=@list.name
 
-#set-detail
+#list-detail list-id=@list.id
 	' Total Length: 
-	span.set-length 0
+	span.list-length = @list_length
 	' m
 
 	#song-container
+		- if @list_songs and !@list_songs.empty?
+			- for song in @list_songs do
+				.song length=song.length
+					span.name = song.name
+					span.length = nice_time song.length
+					button.red.remove-song X
+
 
 #list-songs
-	- if @songs.empty?
+	- if @band_songs.empty?
 		p 
 			' You should probably 
 			a href=to('/band/' + @band.id + '/songs') enter some songs
@@ -25,7 +32,7 @@ input#list-name placeholder="List Name"
 		h4 Songs
 		table
 			tbody
-				- for song in @songs do
+				- for song in @band_songs do
 					tr song-id=song.id band-id=@band.id length=song.length
 						td.add
 							button.add-song &laquo; 

@@ -13,7 +13,7 @@ a#new-list-btn href=to('/band/' + @band.id + '/new_list') New List
 			- for list in @lists do
 				tr
 					td = list.name
-					td = list.length
+					td = nice_time list.length
 					td
 						a href=url("band/#{@band.id}/list/#{list.id}") Edit
 						' 

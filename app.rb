@@ -223,38 +223,15 @@ class SetlistApp < Sinatra::Base
 
 	get '/band/:band/new_list' do
 		@band = Band.new(params[:band])
-		@songs = @band.songs.map do |song|
+		@band_songs = @band.songs.map do |song|
 			Song.new(song)
 		end
 		
 		@list = List.new
+		@list_length = 0
 
 		@scripts << '/scripts/list.js'
 		slim :list
-	end
-
-	post '/band/:band/new_list' do
-		band = params['band']
-		songs = params['songs']
-
-		['list_name', 'songs'].each do |p|
-			if params[p].empty?
-				halt 400, "No #{p} specified."
-			end
-		end
-
-		# TODO: make sure there's at least one songs
-
-		list = redis.incr('global/nextListID')
-		
-		songs.each do |song|
-			redis.lpush("list/#{list}/songs", song)
-		end
-
-		redis.set("list/#{list}/name", params[:list_name])
-		redis.sadd("band/#{band}/lists", list)
-
-		list.to_s
 	end
 
 	get '/band/:band/list/:list' do
@@ -264,11 +241,64 @@ class SetlistApp < Sinatra::Base
 		end
 		
 		@list = List.new(params[:list])
+		@list_length = 0
 		@list_songs = @list.songs.map do |song|
-			Song.new(song)
+			match = /(\d+):(.+)/.match(song)
+			
+			if match
+				song = Object.new
+				def song.length
+					@length
+				end
+				def song.name
+					@name
+				end
+				def song.init(length, name)
+					@name = name
+					@length = length
+				end
+
+				@list_length += match[1].to_i				
+				song.init(match[1], match[2])
+				song
+			end
 		end
 
+		@scripts << '/scripts/list.js'
 		slim :list
+	end
+
+	post '/band/:band/new_list' do
+		band = params['band']
+
+		list = redis.incr('global/nextListID')
+		redis.sadd("band/#{band}/lists", list)
+		request.path_info = "/band/#{band}/list/#{list}"
+		pass
+	end
+
+	post '/band/:band/list/:list' do
+		songs = params['songs']
+		list = params['list']
+
+		['list_name', 'length'].each do |p|
+			if params[p].empty?
+				halt 400, "No #{p} specified."
+			end
+		end
+
+		redis.del("list/#{list}/songs")
+
+		unless songs.empty?
+			songs.each do |song|
+				redis.rpush("list/#{list}/songs", song)
+			end
+		end
+
+		redis.set("list/#{list}/name", params[:list_name])
+		redis.set("list/#{list}/length", params[:length])
+
+		list.to_s
 	end
 
 	get '/band/:band/list/:list/delete' do
