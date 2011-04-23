@@ -1,18 +1,15 @@
-#set-container
-	ul#sets
-		li Set 1
-
-	button#add-set +
+h3
+	- if @list.id
+		| Edit Setlist
+	- else 
+		| New Setlist
 
 #set-detail
-	#info
-		' Set
-		span.set-number 1
-		' : 
-		span.set-length 0
-		' m
+	' Total Length: 
+	span.set-length 0
+	' m
 
-		#song-container
+	#song-container
 
 #list-songs
 	- if @songs.empty?

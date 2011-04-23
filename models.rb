@@ -43,7 +43,7 @@ class List
 #	list/<list_id>/<set_index> = a list of <song_id>s. note that set_index is 1 indexed
 
 	def initialize(id=nil)
-		@sets = []
+		@songs = []
 
 		if id
 			redis = Redis.new
@@ -51,14 +51,7 @@ class List
 			prefix = 'list/' + id.to_s
 			@name = redis.get prefix + '/name'
 			@length = redis.get prefix + '/length'
-			set_count = redis.scard(prefix + '/sets') or 0
-			
-			set_count.times do |i|
-				n = (i + 1).to_s
-
-				@sets << redis.lrange(prefix + '/' + n, 0, -1)
-			end
-			
+			@songs = redis.lrange(prefix + '/songs', 0, -1)
 		end
 	end
 	

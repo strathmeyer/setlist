@@ -239,22 +239,27 @@ class SetlistApp < Sinatra::Base
 		user_or_login
 
 		band = params['band']
-		sets = params['sets']
+		songs = params['songs']
 
-		return sets.inspect
+		return songs.inspect
 
-		# TODO: make sure there's at least one set
+		if params[:list_name].empty?
+			halt 400, 'No list name specified.'
+		end
+
+		# TODO: make sure there's at least one songs
 
 		list = redis.incr('global/nextListID')
 		
-		sets.each_with_index do |set, i|
-			set['songs'].each do |song|
-				song_data = song['length'] + ':' + song['name']
-				redis.lpush("list/#{list}/#{i}", song_data)
-			end
+		songs.each do |song|
+			song_data = song['length'] + ':' + song['name']
+			redis.lpush("list/#{list}/songs", song_data)
 		end
 
-		redirect to "/band/#{params[:id]}"
+		redis.set("list/#{list}/name", params[:list_name])
+		redis.lpush("band/#{band}/lists", list)
+
+		redirect to "/band/#{params[:band]}"
 	end
 
 	get '/band/:band/list/:list' do
@@ -269,7 +274,6 @@ class SetlistApp < Sinatra::Base
 		@list_songs = @list.songs.map do |song|
 			Song.new(song)
 		end
-
 
 		slim :list
 	end
