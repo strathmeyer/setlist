@@ -9,12 +9,12 @@ input#list-name placeholder="List Name" value=@list.name
 
 #list-detail list-id=@list.id
 	' Total Length: 
-	span.list-length = @list_length
+	span.list-length = @list.length
 	' m
 
 	#song-container
-		- if @list_songs and !@list_songs.empty?
-			- for song in @list_songs do
+		- unless @list.songs.empty?
+			- for song in @list.songs do
 				.song length=song.length
 					span.name = song.name
 					span.length = nice_time song.length

@@ -184,7 +184,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/songs' do
-		@band = Band.new(params[:band])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
 		end
@@ -222,7 +221,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/new_list' do
-		@band = Band.new(params[:band])
 		@band_songs = @band.songs.map do |song|
 			Song.new(song)
 		end
@@ -235,34 +233,11 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/list/:list' do
-		@band = Band.new(params[:band])
 		@band_songs = @band.songs.map do |song|
 			Song.new(song)
 		end
 		
 		@list = List.new(params[:list])
-		@list_length = 0
-		@list_songs = @list.songs.map do |song|
-			match = /(\d+):(.+)/.match(song)
-			
-			if match
-				song = Object.new
-				def song.length
-					@length
-				end
-				def song.name
-					@name
-				end
-				def song.init(length, name)
-					@name = name
-					@length = length
-				end
-
-				@list_length += match[1].to_i				
-				song.init(match[1], match[2])
-				song
-			end
-		end
 
 		@scripts << '/scripts/list.js'
 		slim :list
@@ -299,6 +274,12 @@ class SetlistApp < Sinatra::Base
 		redis.set("list/#{list}/length", params[:length])
 
 		list.to_s
+	end
+
+	get '/band/:band/list/:list/print' do
+		@list = List.new(params[:list])
+
+		slim :print_list
 	end
 
 	get '/band/:band/list/:list/delete' do

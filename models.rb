@@ -35,8 +35,7 @@ class User
 end
 
 class List
-	attr_reader :id, :name, :length, :songs 
-
+	attr_accessor :id, :name, :length, :songs 
 #	list/<list_id>/name = list name
 #	list/<list_id>/length = number of minutes total
 #	list/<list_id>/sets = number of sets in the list
@@ -52,7 +51,26 @@ class List
 			prefix = 'list/' + id.to_s
 			@name = redis.get prefix + '/name'
 			@length = redis.get prefix + '/length'
-			@songs = redis.lrange(prefix + '/songs', 0, -1)
+			@songs = redis.lrange(prefix + '/songs', 0, -1).map do |song|
+				match = /(\d+):(.+)/.match(song)
+				
+				if match
+					song = Object.new
+					def song.length
+						@length
+					end
+					def song.name
+						@name
+					end
+					def song.init(length, name)
+						@name = name
+						@length = length
+					end
+
+					song.init(match[1], match[2])
+					song
+				end
+			end
 		end
 	end
 	
