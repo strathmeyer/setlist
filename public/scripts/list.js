@@ -4,6 +4,7 @@ jQuery(function ($) {
 
 	songTemplate = $('<div />', {'class': 'song'})
 
+	// add songs to the list
 	$('#list-songs').delegate('.add-song', 'click', function (e) {
 		var $this = $(this),
 				tr = $this.closest('tr'),
@@ -26,13 +27,14 @@ jQuery(function ($) {
 		);
 	});
 
+	// highlight on Add Button hover
 	$('#list-songs .add-song').hover(function () {
 		$(this).closest('tr').addClass('hover');
 	}, function () {
 		$(this).closest('tr').removeClass('hover');
 	});
 
-
+	// remove songs from the list
 	$('#song-container').delegate('.remove-song', 'click', function (e) {
 		var $this = $(this),
 				song = $this.closest('.song'),
