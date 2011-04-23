@@ -164,10 +164,10 @@ class SetlistApp < Sinatra::Base
 		redirect('/band/' + id)
 	end
 
-	get '/band/:id' do
+	get '/band/:band' do
 		user_or_login
 
-		@band = Band.new(params[:id])
+		@band = Band.new(params[:band])
 		@lists = @band.lists.map do |id|
 			List.new(id)
 		end
@@ -177,10 +177,10 @@ class SetlistApp < Sinatra::Base
 		slim :band
 	end
 
-	get '/band/:id/songs' do
+	get '/band/:band/songs' do
 		user_or_login
 
-		@band = Band.new(params[:id])
+		@band = Band.new(params[:band])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
 		end
