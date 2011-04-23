@@ -4,6 +4,8 @@ jQuery(function ($) {
 
 	songTemplate = $('<div />', {'class': 'song'})
 
+	$('#song-container').sortable();
+
 	// add songs to the list
 	$('#list-songs').delegate('.add-song', 'click', function (e) {
 		var $this = $(this),
