@@ -68,7 +68,7 @@ class SetlistApp < Sinatra::Base
 
 		def is_email(s)
 			valid = '[^ @]+'
-			/#{valid}@#{valid}\.#{valid}/ =~ s
+			/^#{valid}@#{valid}\.#{valid}$/ =~ s
 		end
 
 	end
