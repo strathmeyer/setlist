@@ -1,12 +1,12 @@
-p Free setlists for everyone. 
-pre \m/
+h3 Dashboard
 
 - unless @bands.empty?
+	h4 Your bands:
 	ul
 		- for band in @bands do
 			li band-id="#{band.id}"
 				a href=url('/band/' << band.id)
-					= band.name << ' (' << band.song_count.to_s << ')'
+					= band.name
 
 form action="/new_band" method="POST"
 	p
