@@ -8,19 +8,18 @@ html
 	body
 		#doc
 			#hd
-				ul#global-nav
-					li
-						a href=url('/dashboard') Dashboard
-					li
-						a href=url('/my_account') My Account
-					- if true
-						li
-							a href=url('/logout') Logout
-
 				h1#logo Free Setlist
 
 				- if @user
-					p
+					ul#global-nav
+						li
+							a href=url('/dashboard') Dashboard
+						li
+							a href=url('/my_account') My Account
+						li
+							a href=url('/logout') Logout
+
+					p#logged-in-as
 						' Logged in as
 						span.email = @user[:email]
 				
