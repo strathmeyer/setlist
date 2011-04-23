@@ -164,10 +164,16 @@ class SetlistApp < Sinatra::Base
 		redirect('/band/' + id)
 	end
 
-	get '/band/:band' do
+	before '/band/:band*' do
 		user_or_login
 
 		@band = Band.new(params[:band])
+		unless redis.sismember("band/#{@band.id}/users", @user[:id])
+			halt 403, "This ain't your band."
+		end
+	end
+
+	get '/band/:band' do
 		@lists = @band.lists.map do |id|
 			List.new(id)
 		end
@@ -178,8 +184,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/songs' do
-		user_or_login
-
 		@band = Band.new(params[:band])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
@@ -194,8 +198,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/band/:band/songs' do
-		user_or_login
-
 		id = redis.incr('global/nextSongID').to_s
 		key = 'song/' + id
 
@@ -211,8 +213,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	delete '/band/:band/song/:song' do
-		user_or_login
-
 		key = 'song/' + params[:song]
 
 		length = redis.get(key + '/length')
@@ -222,8 +222,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/new_list' do
-		user_or_login
-
 		@band = Band.new(params[:band])
 		@songs = @band.songs.map do |song|
 			Song.new(song)
@@ -236,8 +234,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	post '/band/:band/new_list' do
-		user_or_login
-
 		band = params['band']
 		songs = params['songs']
 
@@ -262,8 +258,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/list/:list' do
-		user_or_login
-
 		@band = Band.new(params[:band])
 		@band_songs = @band.songs.map do |song|
 			Song.new(song)
@@ -278,10 +272,6 @@ class SetlistApp < Sinatra::Base
 	end
 
 	get '/band/:band/list/:list/delete' do
-		user_or_login
-
-		# confirm that user "owns" the list
-
 		band = params[:band]
 		list = params[:list]	
 
