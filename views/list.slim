@@ -19,16 +19,12 @@ h3
 			'  first.
 		p Then this will make a lot more sense.
 	- else
+		h4 Songs
 		table
-			thead
-				tr
-					th Add
-					th Name
-					th Length
 			tbody
 				- for song in @songs do
 					tr song-id=song.id band-id=@band.id length=song.length
-						td
+						td.add
 							button.add-song &laquo; 
 						td.name = song.name
 						td.length = nice_time song.length
