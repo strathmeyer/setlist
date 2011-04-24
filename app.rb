@@ -250,6 +250,10 @@ class SetlistApp < Sinatra::Base
 	post '/band/:band/new_list' do
 		band = params['band']
 
+		if params['list_name'].empty?
+			halt 400, "No list name specified."
+		end
+
 		list = redis.incr('global/nextListID')
 		redis.sadd("band/#{band}/lists", list)
 		request.path_info = "/band/#{band}/list/#{list}"
