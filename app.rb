@@ -182,6 +182,7 @@ class SetlistApp < Sinatra::Base
 			List.new(id)
 		end
 
+		@lists.reverse!
 		@song_count = @band.song_count
 		@total_time = nice_time(@band.length)
 
