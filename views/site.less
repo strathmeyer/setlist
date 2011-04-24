@@ -129,12 +129,40 @@ a {
 	float: left;
 
 	a {
-		background: #B9D4E7;
+		font-weight:bold;
+		color: #22587E;
 		text-decoration: none;
 
 		:hover {
 			text-decoration: underline;
-			background: none;
+		}
+	}
+
+	table {
+		border: solid 1px #CCC;
+
+		thead {
+			background: #DDD;
+		}
+
+		th {
+			font-weight: bold;
+			text-align: left;
+		}
+		
+		th, td {
+			padding: 10px 20px;
+		}
+
+		tr {
+			border-bottom: 1px solid #DDD;
+		}
+		tr:last-child {
+			border-bottom: none;
+		}
+
+		a {
+			margin-right: 10px;
 		}
 	}
 }
@@ -248,17 +276,6 @@ a {
 		}
 	}
 
-	th {
-		text-align: left;
-	}
-
-	tr {
-		border-bottom: 1px solid #DDD;
-	}
-	tr:last-child {
-		border-bottom: none;
-	}
-
 	tr.hover {
 		background: #DFF7C3;
 	}
@@ -266,32 +283,44 @@ a {
 }
 
 #band {
-	width: 400px;
+	width: 800px;
 	margin: 0 auto;
 
+	#new-list-btn {
+		display: block;
+		margin-left: 0;
+	}
+
 	#band-lists {
+		clear: both;
 		margin: 30px 0;
-		border: 1px solid #CCC;
-		width: 100%;
+		float: left;
+		width: 500px;
 	}
 
-	thead {
-		background: #DDD;
-	}
+	#song-stats {
+		float: right;
+		width: 170px;
+		padding: 20px 40px;
+		background: #DFF7C3;
+		border: 1px solid #8CBE52;
+		border-top: 0;
+		border-left: 0;
 
-	th {
-		font-weight: bold;
-		text-align: left;
-	}
-	
-	th, td {
-		padding: 10px 20px;
-	}
+		.song-count {
+			font-size: 500%;
+		}
 
-	tr {
-		border-bottom: 1px solid #DDD;
-	}
-	tr:last-child {
-		border-bottom: none;
+		.total-time {
+			font-size: 450%;
+			margin: 0.3em 0;
+		}
+
+		a {
+			background: none;
+			display: block;
+			text-align: center;
+			font-size: 80%;
+		}
 	}
 }
