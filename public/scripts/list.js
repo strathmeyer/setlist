@@ -60,6 +60,11 @@ jQuery(function ($) {
 
 		e.preventDefault();
 
+		if (!listName) {
+			alert('Please enter a list name.');
+			return;
+		}
+
 		$('#song-container .song').each(function () {
 				var $this = $(this),
 						length = $this.attr('length'),
