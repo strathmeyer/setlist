@@ -43,6 +43,8 @@ a {
 	color: black;
 }
 
+.text-placeholder {color: #AAA !important}
+
 #hd {
 	border-bottom: 5px solid #522585;
 	padding-bottom: 2px;
@@ -137,6 +139,59 @@ a {
 	}
 }
 
+#login {
+	margin: 40px 100px;
+	float: left;
+	width: 760px;
+
+	.hint {
+		float: right;
+		width: 210px;
+		padding: 0 30px;
+		background: #D1BCE9; 
+		font-size: 75%;
+		color: #333;
+		line-height: 1.9em;
+		border: 1px solid #7040A6;
+		
+		p {
+			margin: 1.5em 0;
+		}
+
+		strong {
+			display: block;
+		}
+	}
+
+	form {
+		float: left;
+		width: 340px;
+
+		p { 
+			width: 100%;
+			float: left;
+			clear: both; 
+		}
+
+		#submit_btn {
+			float: right;
+		}
+
+	}
+
+	label {
+		width: 140px;
+		float: left;
+		padding-top: 0.7em
+	}
+
+	input {
+		width: 180px;
+		float: right;
+	}
+
+}
+
 #song-container {
 	overflow-y: scroll;
 	height: 300px;
@@ -210,57 +265,33 @@ a {
 
 }
 
-.text-placeholder {color: #AAA !important}
+#band {
+	width: 400px;
+	margin: 0 auto;
 
-#login {
-	margin: 40px 100px;
-	float: left;
-	width: 760px;
-
-	.hint {
-		float: right;
-		width: 210px;
-		padding: 0 30px;
-		background: #D1BCE9; 
-		font-size: 75%;
-		color: #333;
-		line-height: 1.9em;
-		border: 1px solid #7040A6;
-		
-		p {
-			margin: 1.5em 0;
-		}
-
-		strong {
-			display: block;
-		}
+	#band-lists {
+		margin: 30px 0;
+		border: 1px solid #CCC;
+		width: 100%;
 	}
 
-	form {
-		float: left;
-		width: 340px;
-
-		p { 
-			width: 100%;
-			float: left;
-			clear: both; 
-		}
-
-		#submit_btn {
-			float: right;
-		}
-
+	thead {
+		background: #DDD;
 	}
 
-	label {
-		width: 140px;
-		float: left;
-		padding-top: 0.7em
+	th {
+		font-weight: bold;
+		text-align: left;
+	}
+	
+	th, td {
+		padding: 10px 20px;
 	}
 
-	input {
-		width: 180px;
-		float: right;
+	tr {
+		border-bottom: 1px solid #DDD;
 	}
-
+	tr:last-child {
+		border-bottom: none;
+	}
 }

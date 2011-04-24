@@ -1,37 +1,38 @@
-h3 Lists
+#band
+	h3 Lists
 
-a#new-list-btn href=to('/band/' + @band.id + '/new_list') New List
+	button#new-list-btn href=to('/band/' + @band.id + '/new_list') New List
 
-- if !@lists.empty?
-	table border="1"
-		thead
-			tr
-				th Name
-				th Length
-				th Actions
-		tbody
-			- for list in @lists do
+	- if !@lists.empty?
+		table#band-lists border="1"
+			thead
 				tr
-					td = list.name
-					td = nice_time list.length
-					td
-						a href=url("band/#{@band.id}/list/#{list.id}") Edit
-						' 
-						a href=url("band/#{@band.id}/list/#{list.id}/delete") Delete
+					th Name
+					th Length
+					th Actions
+			tbody
+				- for list in @lists do
+					tr
+						td = list.name
+						td = nice_time list.length
+						td
+							a href=url("band/#{@band.id}/list/#{list.id}") Edit
+							' 
+							a href=url("band/#{@band.id}/list/#{list.id}/delete") Delete
 
-- else
-	p.no-lists
-		- if @song_count > 0
-			' No lists. Please
-			a href=to('/band/' + @band.id + '/new_list') create a new list
-			'.
-		- else
-			a href=to('/band/' + @band.id + '/songs') Add some songs
-			'. After that, you can create a setlist.
+	- else
+		p.no-lists
+			- if @song_count > 0
+				' No lists. Please
+				a href=to('/band/' + @band.id + '/new_list') create a new list
+				'.
+			- else
+				a href=to('/band/' + @band.id + '/songs') Add some songs
+				'. After that, you can create a setlist.
 
-#song-stats
-	span.song-count = @song_count
-	' 
-	= plural('song', @song_count)
-	.total-time = @total_time
-	a href=url('/band/' + @band.id + '/songs') edit songs
+	#song-stats
+		span.song-count = @song_count
+		' 
+		= plural('song', @song_count)
+		.total-time = @total_time
+		a href=url('/band/' + @band.id + '/songs') edit songs

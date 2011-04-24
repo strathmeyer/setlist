@@ -184,6 +184,8 @@ class SetlistApp < Sinatra::Base
 
 		@song_count = @band.song_count
 		@total_time = nice_time(@band.length)
+
+		@scripts << '/scripts/band.js'
 		slim :band
 	end
 
