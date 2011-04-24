@@ -27,6 +27,10 @@ class SetlistApp < Sinatra::Base
 	end	
 
 	before do
+		if request.host == 'freesetlist.com'
+			redirect 'http://www.freesetlist.com/'
+		end
+
 		@scripts = []
 
 		# is the user logged in?
