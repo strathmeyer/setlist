@@ -99,7 +99,7 @@ class SetlistApp < Sinatra::Base
 			link = url('/signup/' + signup)
 			# send an email with link to signup token (e6b32)
 			Pony.mail(:to => email,
-					:from => 'eric@vawks.com', 
+					:from => 'FreeSetlist.com <info@freesetlist.com>',
 					:subject => 'Setlist Account Activation',
 					:body => "Please go to #{link} \n\nThis link is good for 30 days.")
 
