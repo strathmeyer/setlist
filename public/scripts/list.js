@@ -73,7 +73,7 @@ jQuery(function ($) {
 				songs.push(length + ':' + name);
 		});
 
-		$.post('', {
+		$.post(window.location, {
 				list_name: listName, 
 				songs: songs,
 				length: length
