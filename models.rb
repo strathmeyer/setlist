@@ -14,19 +14,33 @@ class Band
 		@length = redis.get prefix + '/length'
 	end
 
+	def users
+		redis = Redis.new
+
+		unless @users
+			ids = redis.smembers 'band/' + @id + '/users'
+
+			@users = ids.map do |u|
+				User.new u
+			end
+		end
+
+		@users
+	end
+
 	def to_s
 		@name
 	end
 end
 
 class User
-	attr_reader :id, :email, :song_count, :songs
+	attr_reader :id, :email, :bands
 
 	def initialize(id)
 		redis = Redis.new
 		@id = id
-		@name = redis.get('band/' << id.to_s << '/name')
-		@song_count = nil
+		@email = redis.get 'user/' + id + '/email'
+		@bands = redis.smembers 'user/' + id + '/bands'
 	end
 
 	def to_s

@@ -190,6 +190,12 @@ class SetlistApp < Sinatra::Base
 		slim :band
 	end
 
+	get '/band/:band/admin' do
+		@members = @band.users
+
+		slim :band_admin
+	end
+
 	get '/band/:band/songs' do
 		@songs = @band.songs.map do |song|
 			Song.new(song)
