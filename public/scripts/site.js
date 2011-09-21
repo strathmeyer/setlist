@@ -3,6 +3,6 @@ jQuery(function ($) {
 });
 
 function followHref(e) {
-	e.preventDefault();
+  e.preventDefault();
 	window.location = jQuery(this).attr('href');
 };
